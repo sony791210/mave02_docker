@@ -1,0 +1,37 @@
+version: "3.5"
+services:
+    vue:
+      container_name: climate_vue
+      build:
+        context: ./vue
+      restart: always
+      privileged: true
+      command: /bin/bash -c "cd /var/www/FrontVue;npm install;npm run build;npm run start"
+      volumes:
+        - ${APP_CODE_PATH_HOST}:/var/www
+      ports:
+        - 4100:3030
+      networks:
+        - server_netsserver
+    python:
+      container_name: climate_django
+      build:
+        context: ./python
+      restart: always
+#      stdin_open: true # docker run -i
+#      tty: true        # docker run -t
+      command: /bin/bash -c "cd /var/www/API;source venv/bin/activate;pip install -r requirements.txt;python manage.py crontab add;python manage.py runserver 0.0.0.0:8000;"
+      privileged: true
+      volumes:
+        - ${APP_CODE_PATH_HOST}:/var/www
+        - /etc/localtime:/etc/localtime:ro
+        - /var/run/docker.sock:/var/run/docker.sock
+      ports:
+        - 4101:8000
+      networks:
+        - server_netsserver
+    
+networks:
+  server_netsserver:
+    external:
+      name: server_netsserver

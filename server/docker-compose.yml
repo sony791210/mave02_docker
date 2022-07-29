@@ -1,0 +1,65 @@
+version: '3'
+
+networks:
+  netsserver:
+    driver: bridge
+
+services:
+### Mysql  ##################################
+    mysql:
+      container_name: mysql
+      hostname: mysql
+      build:
+        context: ./mysql
+        args:
+          - MYSQL_VERSION=${MYSQL_VERSION}
+      restart: always
+      environment:
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - TZ=${WORKSPACE_TIMEZONE}
+      privileged: true
+      volumes:
+        - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
+        - ${MYSQL_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
+      ports:
+        - 3306:3306
+      networks:
+        - netsserver
+### Redis  ##################################
+    redis:
+      container_name: redis
+      build:
+        context: ./redis
+        args:
+          - REDIS_VERSION=${REDIS_VERSION}
+      restart: always
+      privileged: true
+      volumes:
+        - ${DATA_PATH_HOST}/redis:/data
+      command: --requirepass ${REDIS_PASSWORD}
+      ports:
+        - 6379:6379
+      networks:
+        - netsserver
+
+
+### MongoDB ##############################################
+    mongo:
+      build: 
+        context: ./mongo
+        args:
+          - MONGO_VERSION=${MONGO_VERSION}
+      ports:
+        - "27017:27017"
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      privileged: true
+      volumes:
+        - ${DATA_PATH_HOST}/mongo:/data/db
+        - ${DATA_PATH_HOST}/mongo_config:/data/configdb
+      networks:
+        - netsserver

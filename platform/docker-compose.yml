@@ -1,0 +1,48 @@
+version: "3.5"
+services:
+    react:
+      container_name: platform_react
+      build:
+        context: ./react
+      restart: always
+      privileged: true
+      command: /bin/bash -c "cd /var/www/maev02_reader_front;yarn install;yarn run dev"
+      volumes:
+        - ${APP_CODE_PATH_HOST}:/var/www
+      ports:
+        - 4000:443
+      networks:
+        - server_netsserver
+    golang:
+      container_name: platform_golang
+      build:
+        context: ./golang
+      restart: always
+      privileged: true
+#      stdin_open: true # docker run -i
+#      tty: true        # docker run -t
+      command: /bin/bash -c "cd /var/www/maev02_reader_backend;go mod vendor;go run main.go;"
+      volumes:
+        - ${APP_CODE_PATH_HOST}:/var/www
+      ports:
+        - 4001:2000
+      networks:
+        - server_netsserver
+    python:
+      container_name: platform_flask
+      build:
+        context: ./python
+      restart: always
+      command: /bin/bash -c "cd /var/www/maev02_reader_crawler;source venv/bin/activate;pip install -r requirements.txt;python main.py"
+      privileged: true
+      volumes:
+        - ${APP_CODE_PATH_HOST}:/var/www
+      ports:
+        - 4002:4000
+      networks:
+        - server_netsserver
+    
+networks:
+  server_netsserver:
+    external:
+      name: server_netsserver

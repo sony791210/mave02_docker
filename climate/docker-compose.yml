@@ -20,7 +20,7 @@ services:
       restart: always
 #      stdin_open: true # docker run -i
 #      tty: true        # docker run -t
-      command: /bin/bash -c "cd /var/www/API;source venv/bin/activate;pip install -r requirements.txt;python manage.py crontab add;python manage.py runserver 0.0.0.0:8000;"
+      command: /bin/bash -c "cd /var/www/API;source venv/bin/activate;pip install -r requirements.txt;python manage.py crontab add;service cron restart;python manage.py runserver 0.0.0.0:8000;"
       privileged: true
       volumes:
         - ${APP_CODE_PATH_HOST}:/var/www

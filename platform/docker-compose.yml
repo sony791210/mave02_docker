@@ -33,14 +33,29 @@ services:
       build:
         context: ./python
       restart: always
-      command: /bin/bash -c "cd /var/www/maev02_reader_crawler;source venv/bin/activate;pip install -r requirements.txt;python main.py"
+      #command: /bin/bash -c "cd /var/www/maev02_reader_crawler;source venv/bin/activate;pip install -r requirements.txt;python main.py"
+      #command: /bin/bash -c "cd /var/www/maev02_reader_crawler;source venv/bin/activate;cp supervisord.conf /etc/;;unlink /tmp/supervisor.sock;supervisord -c /etc/supervisord.conf"
+      stdin_open: true
+      tty: true 
       privileged: true
       volumes:
         - ${APP_CODE_PATH_HOST}:/var/www
+        - /etc/localtime:/etc/localtime:ro
       ports:
         - 4002:4000
       networks:
         - server_netsserver
+    chrome:
+      container_name: platform_chrome
+      image: selenium/standalone-chrome:103.0 
+      shm_size: '2gb'
+      restart: always
+      ports:
+        - 4444:4444
+        - 7900:7900
+      networks:
+        - server_netsserver
+
     
 networks:
   server_netsserver:
